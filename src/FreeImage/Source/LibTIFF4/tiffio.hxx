@@ -1,4 +1,4 @@
-/* $Id: tiffio.hxx,v 1.2 2012/02/25 17:48:20 drolon Exp $ */
+/* $Id: tiffio.hxx,v 1.12 2015/10/09 21:36:11 drolon Exp $ */
 
 /*
  * Copyright (c) 1988-1997 Sam Leffler

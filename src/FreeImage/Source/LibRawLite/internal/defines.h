@@ -1,5 +1,5 @@
 /* 
-  Copyright 2008-2010 LibRaw LLC (info@libraw.org)
+  Copyright 2008-2015 LibRaw LLC (info@libraw.org)
 
 LibRaw is free software; you can redistribute it and/or modify
 it under the terms of the one of three licenses as you choose:
@@ -21,11 +21,13 @@ it under the terms of the one of three licenses as you choose:
    for more information
 */
 
+#ifndef USE_JPEG
 #define NO_JPEG
+#endif
 #ifndef USE_JASPER
 #define NO_JASPER
 #endif
-#define DCRAW_VERSION "9.12"
+#define DCRAW_VERSION "9.26"
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -43,33 +45,6 @@ it under the terms of the one of three licenses as you choose:
 #include <string.h>
 #include <time.h>
 #include <sys/types.h>
-
-/*
-   NO_JPEG disables decoding of compressed Kodak DC120 files.
-   NO_LCMS disables the "-p" option.
- */
-#ifdef NODEPS
-#define NO_JASPER
-#define NO_JPEG
-#define NO_LCMS
-#endif
-#ifndef NO_JASPER
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#include <jasper/jasper.h>	/* Decode RED camera movies */
-#endif
-#ifndef NO_JPEG
-#include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
-#endif
-#ifdef LOCALEDIR
-#include <libintl.h>
-#define _(String) gettext(String)
-#else
-#define _(String) (String)
-#endif
 #ifdef __CYGWIN__
 #include <io.h>
 #endif
@@ -77,15 +52,44 @@ it under the terms of the one of three licenses as you choose:
 #include <sys/utime.h>
 #include <winsock2.h>
 #pragma comment(lib, "ws2_32.lib")
-#if _MSC_VER < 1900
-   #define snprintf _snprintf
-#endif
-#define strcasecmp _stricmp
+/* Visual Studio 2015 / VC 14 / MSVC 19.00 finally has snprintf() */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)
+#define snprintf _snprintf
+#endif // _MSC_VER
+#define strcasecmp stricmp
 #define strncasecmp strnicmp
 #else
 #include <unistd.h>
 #include <utime.h>
 #include <netinet/in.h>
+#include <stdint.h>
+typedef int64_t INT64;
+typedef uint64_t UINT64;
+#endif
+
+#ifdef NODEPS
+#define NO_JASPER
+#define NO_JPEG
+#define NO_LCMS
+#endif
+#ifndef NO_JASPER
+#include <jasper/jasper.h>	/* Decode Red camera movies */
+#endif
+#ifndef NO_JPEG
+#include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
+#endif				/* and Adobe Lossy DNGs */
+#ifndef NO_LCMS
+#ifdef USE_LCMS
+#include <lcms.h>		/* Support color profiles */
+#else
+#include <lcms2.h>		/* Support color profiles */
+#endif
+#endif
+#ifdef LOCALEDIR
+#include <libintl.h>
+#define _(String) gettext(String)
+#else
+#define _(String) (String)
 #endif
 
 #ifdef LJPEG_DECODE
@@ -107,8 +111,10 @@ it under the terms of the one of three licenses as you choose:
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define LIM(x,min,max) MAX(min,MIN(x,max))
 #define ULIM(x,y,z) ((y) < (z) ? LIM(x,y,z) : LIM(x,z,y))
-#define CLIP(x) LIM(x,0,65535)
+#define CLIP(x) LIM((int)(x),0,65535)
 #define SWAP(a,b) { a=a+b; b=a-b; a=a-b; }
+
+#define my_swap(type, i, j) {type t = i; i = j; j = t;}
 
 /*
    In order to inline this calculation, I make the risky
@@ -149,7 +155,10 @@ it under the terms of the one of three licenses as you choose:
 	3 G R G R G R	3 B G B G B G	3 R G R G R G	3 G B G B G B
  */
 
+#define RAW(row,col) \
+	raw_image[(row)*raw_width+(col)]
 #define BAYER(row,col) \
 	image[((row) >> shrink)*iwidth + ((col) >> shrink)][FC(row,col)]
+
 #define BAYER2(row,col) \
-	image[((row) >> shrink)*iwidth + ((col) >> shrink)][fc(row,col)]
+	image[((row) >> shrink)*iwidth + ((col) >> shrink)][fcol(row,col)]
