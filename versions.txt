@@ -15,6 +15,10 @@ CUSTOM OGRE CHANGES
   Fixed loss of precision typecast to support MinGW 64-bit builds.
 * /src/FreeImage/Source/LibRawLite/internal/dcraw_common.cpp (line 14590):
   Added space before DCRAW_VERSION to fix MS VS compiler errors.
+* /src/FreeImage/Source/LibRawLite/internal/dcraw_common.cpp (lines 63-76):
+  Fix for Android.
+* /src/FreeImage/Source/LibTIFF4/tif_config.h (lines 23-26):
+  Excluded for Android (since <search.h> cannot be resolved).
 * /src/zziplib/zzip/conf.h:
   Fix incorrect usage of _MSC_VER to allow MinGW compilation.
 * /src/zlib/gzguts.h (lines 32-34):

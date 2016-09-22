@@ -60,6 +60,21 @@ size_t strnlen(const char *s, size_t n)
   return(p ? p-s : n);
 }
 
+#ifdef ANDROID
+#include <asm/byteorder.h> 
+
+void swab(const void *from, void*to, ssize_t n)
+{
+    if(n < 0)
+        return;
+
+    for(ssize_t i = 0; i < (n / 2) * 2; i += 2)
+    {
+        *((uint16_t*)to + i) = __arch__swab16(*((uint16_t*)from + i));
+    }
+}
+#endif
+
 #ifndef __GLIBC__
 char *my_memmem (char *haystack, size_t haystacklen,
 	      char *needle, size_t needlelen)
