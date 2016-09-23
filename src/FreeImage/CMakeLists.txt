@@ -845,7 +845,7 @@ set(FreeImage_SOURCES
 include_directories(Source)
 include_directories(Source/FreeImageToolkit)
 include_directories(Source/LibJPEG)
-include_directories(Source/LibJXR/common)
+include_directories(Source/LibJXR/common/include)
 include_directories(Source/LibJXR/image/decode)
 include_directories(Source/LibJXR/image/encode)
 include_directories(Source/LibJXR/image/sys)
