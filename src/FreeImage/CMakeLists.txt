@@ -869,7 +869,7 @@ include_directories(Source/OpenEXR/IlmThread)
 include_directories(Source/OpenEXR/Imath)
 include_directories(Source/ZLib)
 
-add_definitions(-DOPJ_STATIC -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -DUSE_JPIP)
+add_definitions(-DOPJ_STATIC -DLIBRAW_NODLL -DLIBRAW_LIBRARY_BUILD -DFREEIMAGE_LIB -DUSE_JPIP -D__ANSI__ -DDISABLE_PERF_MEASUREMENT)
 add_library(FreeImage STATIC ${FreeImage_SOURCES})
 if (OGRE_PROJECT_FOLDERS)
 	set_property(TARGET FreeImage PROPERTY FOLDER Dependencies)
